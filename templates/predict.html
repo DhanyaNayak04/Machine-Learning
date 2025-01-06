@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predictor</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script>
+      window.onload = function () {
+        const form = document.querySelector("form");
+        if (form) form.reset();
+      };
+      // Scroll to the results section if present
+      window.onload = function () {
+        const resultsSection = document.getElementById("results");
+        if (resultsSection) {
+          resultsSection.scrollIntoView({ behavior: "smooth" });
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <form action="/predict" method="POST">
+      <!-- Prediction Form -->
+      <label for="Administrative">Administrative:</label>
+      <input type="number" name="Administrative" step="0.01" required /><br />
+
+      <label for="Administrative_Duration">Administrative Duration:</label>
+      <input
+        type="number"
+        name="Administrative_Duration"
+        step="0.01"
+        required
+      /><br />
+
+      <label for="Informational">Informational:</label>
+      <input type="number" name="Informational" step="0.01" required /><br />
+
+      <label for="Informational_Duration">Informational Duration:</label>
+      <input
+        type="number"
+        name="Informational_Duration"
+        step="0.01"
+        required
+      /><br />
+
+      <label for="ProductRelated">Product Related:</label>
+      <input type="number" name="ProductRelated" step="0.01" required /><br />
+
+      <label for="ProductRelated_Duration">Product Related Duration:</label>
+      <input
+        type="number"
+        name="ProductRelated_Duration"
+        step="0.01"
+        required
+      /><br />
+
+      <label for="BounceRates">Bounce Rates:</label>
+      <input type="number" name="BounceRates" step="0.01" required /><br />
+
+      <label for="ExitRates">Exit Rates:</label>
+      <input type="number" name="ExitRates" step="0.01" required /><br />
+
+      <label for="PageValues">Page Values:</label>
+      <input type="number" name="PageValues" step="0.01" required /><br />
+
+      <label for="SpecialDay">Special Day:</label>
+      <input type="number" name="SpecialDay" step="0.01" required /><br />
+
+      <label for="Month">Month:</label>
+      <select name="Month" required>
+        <option value="Jan">January</option>
+        <option value="Feb">February</option>
+        <option value="Mar">March</option>
+        <option value="Apr">April</option>
+        <option value="May">May</option>
+        <option value="June">June</option>
+        <option value="Jul">July</option>
+        <option value="Aug">August</option>
+        <option value="Sep">September</option>
+        <option value="Oct">October</option>
+        <option value="Nov">November</option>
+        <option value="Dec">December</option>
+      </select>
+      <br />
+
+      <label for="OperatingSystems">Operating Systems:</label>
+      <input
+        type="number"
+        name="OperatingSystems"
+        min="1"
+        max="8"
+        required
+      /><br />
+
+      <label for="Browser">Browser:</label>
+      <input type="number" name="Browser" min="1" max="13" required /><br />
+
+      <label for="Region">Region:</label>
+      <input type="number" name="Region" min="1" max="9" required /><br />
+
+      <label for="TrafficType">Traffic Type:</label>
+      <input type="number" name="TrafficType" min="1" max="20" required /><br />
+
+      <label for="VisitorType">Visitor Type:</label>
+      <select name="VisitorType" required>
+        <option value="Returning_Visitor">Returning Visitor</option>
+        <option value="New_Visitor">New Visitor</option>
+        <option value="Other">Other</option>
+      </select>
+      <br />
+
+      <label for="Weekend">Weekend:</label>
+      <select name="Weekend" required>
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+      </select>
+      <br />
+
+      <button type="submit">Predict</button>
+    </form>
+
+    <!-- Results Section -->
+    {% if predictions %}
+    <div id="results">
+      <h3>Predictions:</h3>
+      <ul>
+        {% for model, prediction in predictions.items() %}
+        <li>{{ model }}: {{ prediction }}</li>
+        {% endfor %}
+      </ul>
+
+      <h3>Final Prediction (Majority Voting):</h3>
+      <p>{{ final_prediction }}</p>
+    </div>
+    {% endif %}
+  </body>
+</html>

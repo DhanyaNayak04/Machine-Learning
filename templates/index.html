@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Shopping Intention</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script>
+      // Clear the form inputs on page load
+      window.onload = function () {
+        const form = document.querySelector("form");
+        if (form) form.reset();
+      };
+    </script>
+  </head>
+  <body>
+    <h1>ML Model Trainer For Online Shoppers Intention</h1>
+
+    <!-- Model Selection -->
+    <form action="/train" method="POST">
+      <label for="model">Choose a model to train:</label>
+      <select name="model" id="model" required>
+        <option value="RandomForest">Random Forest</option>
+        <option value="CatBoost">CatBoost</option>
+        <option value="LogisticRegression">Logistic Regression</option>
+        <option value="ExtraTrees">Extra Trees</option>
+        <option value="SGDClassifier">SGDClassifier</option>
+        <option value="all">Train All Models</option>
+      </select>
+      <button type="submit">Train</button>
+    </form>
+    <button class="pbutton">
+      <a href="/predict.html">Predict</a>
+    </button>
+
+    {% if selected_model %}
+    <h3>Selected Model: {{ selected_model }}</h3>
+    <p>Accuracy: {{ accuracy }}</p>
+    {% endif %} {% if chart_url %}
+    <h3>Model Accuracy Comparison</h3>
+    <img
+      src="data:image/png;base64,{{ chart_url }}"
+      alt="Model Comparison Chart"
+    />
+    {% endif %}
+  </body>
+</html>
