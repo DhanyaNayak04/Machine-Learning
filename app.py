@@ -8,21 +8,18 @@ from sklearn.linear_model import LogisticRegression,SGDClassifier
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import RandomOverSampler
 from flask import Flask, request, jsonify, render_template
+import matplotlib.pyplot as plt
+import io
+import base64
 
 # Load dataset
 dataset = pd.read_csv('online_shoppers_intention.csv')
 
 # Preprocessing
-"""le_month = LabelEncoder()
-le_visitor_type = LabelEncoder()
-
-# Encode categorical features
-dataset['Month'] = le_month.fit_transform(dataset['Month'])
-dataset['VisitorType'] = le_visitor_type.fit_transform(dataset['VisitorType'])"""
-
 # Split into features and target
 X=dataset.iloc[:,:-1].values
 y=dataset.iloc[:,-1].values
+
 le=LabelEncoder()
 for i in [10,15,16]:
     X[:,i]=le.fit_transform(X[:,i])
@@ -37,14 +34,9 @@ sc=StandardScaler()
 X_train_scaled = sc.fit_transform(X_train)
 X_test_scaled = sc.transform(X_test)
 
-
-
 from imblearn.over_sampling import RandomOverSampler
 oversampler = RandomOverSampler(random_state=42)
 x_train_resampled, y_train_resampled = oversampler.fit_resample(X_train_scaled, y_train)
-
-
-
 
 # Apply PCA for dimensionality reduction
 pca = PCA(n_components=0.95)
@@ -79,19 +71,11 @@ all_objects = {
     'Scaler': sc,
     'PCA': pca
 }
-
 # Save the dictionary to a single .pkl file
 with open('all_models.pkl', 'wb') as file:
     pickle.dump(all_objects, file)
-
-
 # Flask app
 app = Flask(__name__)
-
-import matplotlib.pyplot as plt
-import io
-import base64
-
 # Accuracy Calculation
 from sklearn.metrics import accuracy_score
 
@@ -159,7 +143,6 @@ def train():
         # Display accuracy of the selected model
         accuracy = model_accuracies.get(selected_model, None)
         return render_template('index.html', selected_model=selected_model, accuracy=accuracy)
-
 
 
 @app.route('/predict.html')
