@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Predictor</title>
     <link rel="stylesheet" href="/static/styles.css" />
+
     <script>
+      // Reset the form and scroll to results section if needed
       window.onload = function () {
         const form = document.querySelector("form");
         if (form) form.reset();
-      };
-      // Scroll to the results section if present
-      window.onload = function () {
+
         const resultsSection = document.getElementById("results");
         if (resultsSection) {
           resultsSection.scrollIntoView({ behavior: "smooth" });
@@ -20,119 +20,153 @@
     </script>
   </head>
   <body>
-    <form action="/predict" method="POST">
+    <header>
+      <h1>E-commerce Predictor</h1>
+    </header>
+
+    <main>
+      <!-- Dataset Info Section -->
+      <div class="info">
+        <h3>Dataset Information</h3>
+        <p>
+          The dataset consists of 10 numerical and 8 categorical attributes. The
+          'Revenue' attribute can be used as the class label.
+        </p>
+        <p><strong>Numerical Attributes:</strong></p>
+        <ul>
+          <li>
+            "Administrative", "Administrative Duration", "Informational",
+            "Informational Duration", "Product Related", and "Product Related
+            Duration" represent the number of different types of pages visited
+            by the visitor and total time spent in each category.
+          </li>
+          <li>
+            "Bounce Rate", "Exit Rate", and "Page Value" are metrics from Google
+            Analytics.
+          </li>
+          <li>
+            "Special Day" indicates the closeness of the visit date to special
+            events (e.g., Valentine's Day).
+          </li>
+        </ul>
+        <p><strong>Categorical Attributes:</strong></p>
+        <ul>
+          <li>
+            Includes "Operating Systems", "Browser", "Region", "Traffic Type",
+            "Visitor Type", and whether the visit occurred on a weekend or
+            during a specific month.
+          </li>
+        </ul>
+      </div>
+
       <!-- Prediction Form -->
-      <label for="Administrative">Administrative:</label>
-      <input type="number" name="Administrative" step="0.01" required /><br />
+      <form action="/predict" method="POST">
+        <label for="Administrative">Administrative:</label>
+        <input type="number" name="Administrative" step="0.01" required />
 
-      <label for="Administrative_Duration">Administrative Duration:</label>
-      <input
-        type="number"
-        name="Administrative_Duration"
-        step="0.01"
-        required
-      /><br />
+        <label for="Administrative_Duration">Administrative Duration:</label>
+        <input
+          type="number"
+          name="Administrative_Duration"
+          step="0.01"
+          required
+        />
 
-      <label for="Informational">Informational:</label>
-      <input type="number" name="Informational" step="0.01" required /><br />
+        <label for="Informational">Informational:</label>
+        <input type="number" name="Informational" step="0.01" required />
 
-      <label for="Informational_Duration">Informational Duration:</label>
-      <input
-        type="number"
-        name="Informational_Duration"
-        step="0.01"
-        required
-      /><br />
+        <label for="Informational_Duration">Informational Duration:</label>
+        <input
+          type="number"
+          name="Informational_Duration"
+          step="0.01"
+          required
+        />
 
-      <label for="ProductRelated">Product Related:</label>
-      <input type="number" name="ProductRelated" step="0.01" required /><br />
+        <label for="ProductRelated">Product Related:</label>
+        <input type="number" name="ProductRelated" step="0.01" required />
 
-      <label for="ProductRelated_Duration">Product Related Duration:</label>
-      <input
-        type="number"
-        name="ProductRelated_Duration"
-        step="0.01"
-        required
-      /><br />
+        <label for="ProductRelated_Duration">Product Related Duration:</label>
+        <input
+          type="number"
+          name="ProductRelated_Duration"
+          step="0.01"
+          required
+        />
 
-      <label for="BounceRates">Bounce Rates:</label>
-      <input type="number" name="BounceRates" step="0.01" required /><br />
+        <label for="BounceRates">Bounce Rates:</label>
+        <input type="number" name="BounceRates" step="0.01" required />
 
-      <label for="ExitRates">Exit Rates:</label>
-      <input type="number" name="ExitRates" step="0.01" required /><br />
+        <label for="ExitRates">Exit Rates:</label>
+        <input type="number" name="ExitRates" step="0.01" required />
 
-      <label for="PageValues">Page Values:</label>
-      <input type="number" name="PageValues" step="0.01" required /><br />
+        <label for="PageValues">Page Values:</label>
+        <input type="number" name="PageValues" step="0.01" required />
 
-      <label for="SpecialDay">Special Day:</label>
-      <input type="number" name="SpecialDay" step="0.01" required /><br />
+        <label for="SpecialDay">Special Day:</label>
+        <input type="number" name="SpecialDay" step="0.01" required />
 
-      <label for="Month">Month:</label>
-      <select name="Month" required>
-        <option value="Jan">January</option>
-        <option value="Feb">February</option>
-        <option value="Mar">March</option>
-        <option value="Apr">April</option>
-        <option value="May">May</option>
-        <option value="June">June</option>
-        <option value="Jul">July</option>
-        <option value="Aug">August</option>
-        <option value="Sep">September</option>
-        <option value="Oct">October</option>
-        <option value="Nov">November</option>
-        <option value="Dec">December</option>
-      </select>
-      <br />
+        <label for="Month">Month:</label>
+        <select name="Month" required>
+          <option value="Jan">January</option>
+          <option value="Feb">February</option>
+          <option value="Mar">March</option>
+          <option value="Apr">April</option>
+          <option value="May">May</option>
+          <option value="Jun">June</option>
+          <option value="Jul">July</option>
+          <option value="Aug">August</option>
+          <option value="Sep">September</option>
+          <option value="Oct">October</option>
+          <option value="Nov">November</option>
+          <option value="Dec">December</option>
+        </select>
 
-      <label for="OperatingSystems">Operating Systems:</label>
-      <input
-        type="number"
-        name="OperatingSystems"
-        min="1"
-        max="8"
-        required
-      /><br />
+        <label for="OperatingSystems">Operating Systems:</label>
+        <input type="number" name="OperatingSystems" min="1" max="8" required />
 
-      <label for="Browser">Browser:</label>
-      <input type="number" name="Browser" min="1" max="13" required /><br />
+        <label for="Browser">Browser:</label>
+        <input type="number" name="Browser" min="1" max="13" required />
 
-      <label for="Region">Region:</label>
-      <input type="number" name="Region" min="1" max="9" required /><br />
+        <label for="Region">Region:</label>
+        <input type="number" name="Region" min="1" max="9" required />
 
-      <label for="TrafficType">Traffic Type:</label>
-      <input type="number" name="TrafficType" min="1" max="20" required /><br />
+        <label for="TrafficType">Traffic Type:</label>
+        <input type="number" name="TrafficType" min="1" max="20" required />
 
-      <label for="VisitorType">Visitor Type:</label>
-      <select name="VisitorType" required>
-        <option value="Returning_Visitor">Returning Visitor</option>
-        <option value="New_Visitor">New Visitor</option>
-        <option value="Other">Other</option>
-      </select>
-      <br />
+        <label for="VisitorType">Visitor Type:</label>
+        <select name="VisitorType" required>
+          <option value="Returning_Visitor">Returning Visitor</option>
+          <option value="New_Visitor">New Visitor</option>
+          <option value="Other">Other</option>
+        </select>
 
-      <label for="Weekend">Weekend:</label>
-      <select name="Weekend" required>
-        <option value="0">No</option>
-        <option value="1">Yes</option>
-      </select>
-      <br />
+        <label for="Weekend">Weekend:</label>
+        <select name="Weekend" required>
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
 
-      <button type="submit">Predict</button>
-    </form>
+        <button type="submit">Predict</button>
+      </form>
 
-    <!-- Results Section -->
-    {% if predictions %}
-    <div id="results">
-      <h3>Predictions:</h3>
-      <ul>
-        {% for model, prediction in predictions.items() %}
-        <li>{{ model }}: {{ prediction }}</li>
-        {% endfor %}
-      </ul>
-
-      <h3>Final Prediction (Majority Voting):</h3>
-      <p>{{ final_prediction }}</p>
-    </div>
-    {% endif %}
+      <!-- Results Section -->
+      {% if predictions %}
+      <div id="results">
+        <h3>Predictions:</h3>
+        <ul>
+          {% for model, prediction in predictions.items() %}
+          <li>{{ model }}: {{ 'Yes' if prediction else 'No' }}</li>
+          {% endfor %}
+        </ul>
+        <h3>Final Prediction (Majority Voting):</h3>
+        {% if final_prediction %}
+        <p>The customer will buy the product.</p>
+        {% else %}
+        <p>The customer will not buy the product.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </main>
   </body>
 </html>
