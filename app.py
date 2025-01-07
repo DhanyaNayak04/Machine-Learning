@@ -8,56 +8,78 @@ from sklearn.linear_model import LogisticRegression,SGDClassifier
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import RandomOverSampler
 from flask import Flask, request, jsonify, render_template
-import matplotlib.pyplot as plt
-import io
-import base64
-
 # Load dataset
 dataset = pd.read_csv('online_shoppers_intention.csv')
 
-# Preprocessing
+# Preprocess function for the second dataset
+def preprocess_data(data, le=None, scaler=None):
+    categorical_columns = ['Month', 'VisitorType', 'Weekend']
+    numerical_columns = [
+        'Administrative', 'Administrative_Duration', 'Informational',
+        'Informational_Duration', 'ProductRelated', 'ProductRelated_Duration',
+        'BounceRates', 'ExitRates', 'PageValues', 'SpecialDay',
+        'OperatingSystems', 'Browser', 'Region', 'TrafficType'
+    ]
+    
+    data = data.copy()
+    
+    # Create LabelEncoders if not provided
+    if le is None:
+        le = LabelEncoder()
+    
+    
+    # Fit and transform Month and VisitorType
+    data['Month'] = le.fit_transform(data['Month'])
+    data['VisitorType'] = le.fit_transform(data['VisitorType'])
+    data['Weekend'] = data['Weekend'].astype(int)  # Convert boolean to int
+
+    # Standardize numerical columns
+    if scaler is None:
+        scaler = StandardScaler()
+    data[numerical_columns] = scaler.fit_transform(data[numerical_columns])
+
+    return data, le, scaler
+
 # Split into features and target
-X=dataset.iloc[:,:-1].values
-y=dataset.iloc[:,-1].values
+X = dataset.iloc[:, :-1]
+y = dataset.iloc[:, -1]
 
-le=LabelEncoder()
-for i in [10,15,16]:
-    X[:,i]=le.fit_transform(X[:,i])
-X[:,-1]=le.fit_transform(X[:,-1])
-y=le.fit_transform(y)
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-from sklearn.preprocessing import StandardScaler
-sc=StandardScaler()
-X_train_scaled = sc.fit_transform(X_train)
-X_test_scaled = sc.transform(X_test)
+# Preprocess the dataset
+X,le,scaler = preprocess_data(X)
 
-from imblearn.over_sampling import RandomOverSampler
+# Encode labels for target
+y = le.fit_transform(y)  # Assuming Revenue is categorical and needs encoding
+
+# Handle class imbalance
 oversampler = RandomOverSampler(random_state=42)
-x_train_resampled, y_train_resampled = oversampler.fit_resample(X_train_scaled, y_train)
+X_resampled, y_resampled = oversampler.fit_resample(X, y)
+
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
 
 # Apply PCA for dimensionality reduction
 pca = PCA(n_components=0.95)
-X_train_pca = pca.fit_transform(x_train_resampled)
-X_test_pca = pca.transform(X_test_scaled )
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
 
-# Train multiple models
+
 rf_model = RandomForestClassifier(random_state=42)
-rf_model.fit(X_train_pca, y_train_resampled)
+rf_model.fit(X_train_pca, y_train)
 
 catboost_model = CatBoostClassifier(iterations=2000, learning_rate=0.1, depth=6, verbose=0, random_seed=42)
-catboost_model.fit(X_train_pca, y_train_resampled)
+catboost_model.fit(X_train_pca, y_train)
 
 logistic_model = LogisticRegression()
-logistic_model.fit(X_train_pca, y_train_resampled)
+logistic_model.fit(X_train_pca, y_train)
 
 sgd_model=SGDClassifier(random_state=42)
-sgd_model.fit(X_train_pca,y_train_resampled)
+sgd_model.fit(X_train_pca,y_train)
 
 extra_trees_model = ExtraTreesClassifier(random_state=42)
-extra_trees_model.fit(X_train_pca, y_train_resampled)
+extra_trees_model.fit(X_train_pca, y_train)
 
 import pickle
 
@@ -68,14 +90,22 @@ all_objects = {
     'LogisticRegression': logistic_model,
     'SGDClassifier': sgd_model,
     'ExtraTrees': extra_trees_model,
-    'Scaler': sc,
+    'Scaler': scaler,
     'PCA': pca
 }
+
 # Save the dictionary to a single .pkl file
 with open('all_models.pkl', 'wb') as file:
     pickle.dump(all_objects, file)
+
+
 # Flask app
 app = Flask(__name__)
+
+import matplotlib.pyplot as plt
+import io
+import base64
+
 # Accuracy Calculation
 from sklearn.metrics import accuracy_score
 
@@ -145,6 +175,8 @@ def train():
         return render_template('index.html', selected_model=selected_model, accuracy=accuracy)
 
 
+
+
 @app.route('/predict.html')
 def predict_page():
     return render_template('predict.html')
@@ -164,21 +196,23 @@ def predict():
             'ExitRates': float(request.form['ExitRates']),
             'PageValues': float(request.form['PageValues']),
             'SpecialDay': float(request.form['SpecialDay']),
-            'Month': le.transform([request.form['Month']])[0] if request.form['Month'] in le.classes_ else 0,
+            'Month': request.form['Month'],
             'OperatingSystems': int(request.form['OperatingSystems']),
             'Browser': int(request.form['Browser']),
             'Region': int(request.form['Region']),
             'TrafficType': int(request.form['TrafficType']),
-            'VisitorType': le.transform([request.form['VisitorType']])[0] if request.form['VisitorType'] in le.classes_ else 0,
+            'VisitorType': request.form['VisitorType'],
             'Weekend': int(request.form['Weekend'])  # Binary: 0 or 1
         }
 
         # Convert input_data to a DataFrame
         input_df = pd.DataFrame([input_data])
 
-        # Preprocess input
-        input_scaled = sc.transform(input_df)
-        input_pca = pca.transform(input_scaled)
+        # Preprocess input (encoding and scaling)
+        input_df, _, _ = preprocess_data(input_df, le, scaler)
+
+        # Apply PCA transformation
+        input_pca = pca.transform(input_df)
 
         # Make predictions
         predictions = {
