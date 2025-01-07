@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.linear_model import LogisticRegression,SGDClassifier
+from sklearn.tree import DecisionTreeClassifier
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import RandomOverSampler
 from flask import Flask, request, jsonify, render_template
@@ -78,6 +79,9 @@ logistic_model.fit(X_train_pca, y_train)
 sgd_model=SGDClassifier(random_state=42)
 sgd_model.fit(X_train_pca,y_train)
 
+dec_tree_model = DecisionTreeClassifier(random_state=42)
+dec_tree_model.fit(X_train_pca, y_train)
+
 extra_trees_model = ExtraTreesClassifier(random_state=42)
 extra_trees_model.fit(X_train_pca, y_train)
 
@@ -90,6 +94,7 @@ all_objects = {
     'LogisticRegression': logistic_model,
     'SGDClassifier': sgd_model,
     'ExtraTrees': extra_trees_model,
+    'DecisionTree':dec_tree_model,
     'Scaler': scaler,
     'PCA': pca
 }
@@ -127,6 +132,9 @@ model_accuracies['ExtraTrees'] = extra_trees_accuracy
 sgd_accuracy=sgd_model.score(X_test_pca, y_test)
 model_accuracies['SGDClassifier'] = sgd_accuracy
 
+dec_accuracy=dec_tree_model.score(X_test_pca, y_test)
+model_accuracies['DecisionTree'] = dec_accuracy
+
 
 @app.route('/')
 def index():
@@ -139,7 +147,7 @@ def train():
     if selected_model == "all":
         # Generate comparison chart
         plt.figure(figsize=(10, 7))  # Larger figure for better visualization
-        colors = ['blue', 'green', 'orange', 'purple', 'red']
+        colors = ['blue', 'green', 'orange', 'purple', 'red','yellow']
         bar_positions = range(len(model_accuracies))
         accuracies = list(model_accuracies.values())
 
@@ -219,7 +227,8 @@ def predict():
             'RandomForest': bool(rf_model.predict(input_pca)[0]),
             'CatBoost': bool(catboost_model.predict(input_pca)[0]),
             'LogisticRegression': bool(logistic_model.predict(input_pca)[0]),
-            'ExtraTrees': bool(extra_trees_model.predict(input_pca)[0])
+            'ExtraTrees': bool(extra_trees_model.predict(input_pca)[0]),
+            'DecisionTree': bool(dec_tree_model.predict(input_pca)[0])
         }
 
         # Ensemble (majority voting)
